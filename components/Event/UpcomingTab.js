@@ -1,41 +1,39 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import UpcomingEvents from './subTabs/UpcomingEvents'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { db } from '../../firebase'
+import React, { useEffect, useState } from 'react';
+import { View, Text, ScrollView } from 'react-native';
+import { db } from '../../firebase';
+import moment from 'moment';
+import UpcomingEvents from './subTabs/UpcomingEvents';
 
-const UpcomingTab = () => {
-  const [events, setEvents] = useState([]);
+const UpcomingTab = ({ navigation }) => {
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = db.collection('events').onSnapshot(snapshot => {
+    const today = moment().startOf('day');
+
+    const unsubscribe = db.collectionGroup('events').onSnapshot(snapshot => {
       const eventsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      setEvents(eventsData);
+
+      const upcomingEventsData = eventsData.filter(event => moment(event.date).isAfter(today));
+      setUpcomingEvents(upcomingEventsData);
     });
+
     return () => unsubscribe();
   }, []);
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <ScrollView style={styles.container}>
-        {events.map((event) => (
-          <UpcomingEvents key={event.id} event={event} />
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+    <ScrollView>
+      {upcomingEvents.length > 0 ? (
+        upcomingEvents.map((event, index) => (
+          <UpcomingEvents key={index} event={event} navigation={navigation} />
+        ))
+      ) : (
+        <Text>No upcoming events available</Text>
+      )}
+    </ScrollView>
   );
-}
-
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-  },
-  container: {
-    marginBottom: 30,
-  }
-});
+};
 
 export default UpcomingTab;

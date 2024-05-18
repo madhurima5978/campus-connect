@@ -56,11 +56,11 @@ const UserPosts = ({navigation}) => {
       <TouchableOpacity onPress={handleSignOut} style={styles.button}>
       <Text style={{ color: 'white' }}>Sign Out</Text>
     </TouchableOpacity>
-    <ScrollView>
+    {/* <ScrollView>
         {posts.map((post, index) => (
           <Post key={index} post={post} />
         ))}
-      </ScrollView>
+      </ScrollView> */}
       <Text style={{height:'77%',}}></Text>
 
     </View>

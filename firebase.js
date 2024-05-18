@@ -4,7 +4,7 @@ import { getAnalytics } from "firebase/analytics";
 import firebase from 'firebase/compat/app'; // Import from 'firebase/compat/app'
 import 'firebase/compat/auth'; // Import other modules you need from firebase/compat
 import 'firebase/compat/firestore';
-
+import 'firebase/messaging';
 import { getStorage, ref } from "firebase/storage";
 
 // TODO: Add SDKs for Firebase products that you want to use

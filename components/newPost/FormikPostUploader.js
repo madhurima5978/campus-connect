@@ -47,7 +47,6 @@ const FormikPostUploader = ({ navigation }) => {
       const selectedImages = result.assets.map(asset => asset.uri);
       setThumbnailUrl(selectedImages[0]);
   }
-  
 };
 
     const uploadPostToFirebase = async (imageUrl, caption) => {

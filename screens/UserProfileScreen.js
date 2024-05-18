@@ -10,9 +10,9 @@ import UserPosts from '../components/UserProfile/UserPosts'
 const UserProfileScreen = ({navigation}) => {
   return (
     <SafeAreaView>
-      <UserProfileHeader users = {USERS[0]}/>
+      <UserProfileHeader />
       <Divider width={1} orientation='vertical'/>
-      <UserDetails users = {USERS[0]}/>
+      <UserDetails users = {USERS[0]} navigation={navigation}/>
       <UserPosts navigation={navigation}/>
       <BottomTabs icons={bottomTabIcons}/>
     </SafeAreaView>

@@ -25,6 +25,8 @@ import PastTab from './components/Event/PastTab';
 import TopTabs from './components/Event/TopTabs';
 import UpdateDetails from './screens/UpdateDetailsScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import UpdateProfilePicScreen from './screens/UpdateProfilePicScreen';
+import DisplayEventScreen from './screens/DisplayEventScreen';
 // import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 // import EventNav from './screens/EventScreen';
 
@@ -72,6 +74,10 @@ const screenOptions = {
         postId: route.params.postId,
         })}/>
         <Stack.Screen name='NewContentScreen' component={CreateNewContent}/>
+        <Stack.Screen name='UpdateProfilePicScreen' component={UpdateProfilePicScreen}/>
+        <Stack.Screen name='DisplayEventScreen' component={DisplayEventScreen} options={({ route }) => ({
+        postOwnerEmail: route.params.ownerEmail,
+        eventId: route.params.eventId})}/>
       </Stack.Navigator>
       <BottomTabs icons={bottomTabIcons} />
       
@@ -82,7 +88,7 @@ const screenOptions = {
 
 const Tab = createMaterialTopTabNavigator();
 
-const CreateNewContent = () => {
+const CreateNewContent = (navigation) => {
   return (
     
       <Tab.Navigator style={styles.container}>

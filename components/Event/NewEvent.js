@@ -5,9 +5,11 @@ import * as ImagePicker from 'expo-image-picker';
 import {firebase, storage, db} from '../../firebase'
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { v4 as uuidv4 } from 'uuid';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 
-const EventForm = () => {
+
+const EventForm = ({navigation}) => {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [date, setDate] = useState('');
@@ -15,6 +17,11 @@ const EventForm = () => {
   const [image, setImage] = useState(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+  const [location, setLocation] = useState('');
+  
+
+
+  
 
   const handleDateConfirm = (selectedDate = new Date()) => {
     setDate(selectedDate.toISOString().split('T')[0]);
@@ -25,6 +32,12 @@ const EventForm = () => {
     setTime(selectedTime.toLocaleTimeString());
     setTimePickerVisibility(false);
   };
+
+
+
+
+
+  
 
 
   const [currentLoggedInUser, setCurrentLoggedInUser] = useState(null)
@@ -89,13 +102,16 @@ const EventForm = () => {
         desc: desc,
         date: date,
         time: time,
+        location: location,
         imageUrl: imageUrl,
         username: currentLoggedInUser.username,
         owner_uid: user.uid,
         owner_email: user.email,
+        registered: [],
       });
   
       Alert.alert('Success', 'Event uploaded successfully!');
+      navigation.navigate('EventScreen') 
     } catch (error) {
       Alert.alert('Error', 'Failed to upload event. Please try again later.');
       console.error('Error uploading event:', error);
@@ -132,11 +148,17 @@ const EventForm = () => {
         placeholder="Event Title"
         value={title}
         onChangeText={setTitle}
+        style={{paddingTop:40}}
       />
       <TextInput
         placeholder="Event Description"
         value={desc}
         onChangeText={setDesc}
+      />
+      <TextInput
+      placeholder='Event Loaction'
+      value={location}
+      onChangeText={setLocation}
       />
       <Button title="Select Date" onPress={() => setDatePickerVisibility(true)} />
       <Text>Date: {date}</Text>
@@ -154,9 +176,10 @@ const EventForm = () => {
         onConfirm={handleTimeConfirm}
         onCancel={() => setTimePickerVisibility(false)}
       />
+      
       <Button title="Select Image" onPress={pickImage} />
       {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
-      <Button title="Upload Event" onPress={uploadEvent} />
+      <Button title="Upload Event" onPress={()=>uploadEvent(navigation)} />
     </View>
   );
 };

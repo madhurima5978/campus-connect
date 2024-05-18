@@ -27,6 +27,7 @@ const SignUpForm = ({navigation}) => {
                 username: username,
                 email: authUser.user.email,
                 rollnumber: rollnumber,
+                profile_picture: null,
              })
         }catch(error){
             Alert.alert('OMG', error.message)

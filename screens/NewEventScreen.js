@@ -3,10 +3,10 @@ import React from 'react'
 
 import NewEvent from '../components/Event/NewEvent'
 
-const NewEventScreen = () => {
+const NewEventScreen = ({navigation}) => {
   return (
     <View>
-      <NewEvent/>
+      <NewEvent navigation={navigation}/>
     </View>
   )
 }

@@ -1,7 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, Animated, StyleSheet } from 'react-native';
 import AuthNavigation from './AuthNavigation';
+import { firebase } from './firebase'; // Adjust the import based on your file structure
 import 'react-native-gesture-handler';
+
+const requestNotificationPermission = async () => {
+  try {
+    await firebase.messaging().requestPermission();
+    const fcmToken = await firebase.messaging().getToken();
+    if (fcmToken) {
+      // Store the FCM token in Firestore
+      const user = firebase.auth().currentUser;
+      await firebase.firestore().collection('users').doc(user.uid).update({
+        fcmToken: fcmToken
+      });
+    }
+  } catch (error) {
+    console.error('Unable to get permission to notify.', error);
+  }
+};
+
 const OpeningScreen = () => {
   const [animation, setAnimation] = useState(new Animated.Value(0));
 
@@ -40,9 +58,21 @@ const App = () => {
   const [showOpeningScreen, setShowOpeningScreen] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setShowOpeningScreen(false);
     }, 3000); // Adjust as needed
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        requestNotificationPermission();
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   return (
