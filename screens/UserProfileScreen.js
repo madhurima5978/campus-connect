@@ -6,14 +6,14 @@ import UserProfileHeader from '../components/UserProfile/UserProfileHeader'
 import { Divider } from 'react-native-elements'
 import UserDetails from '../components/UserProfile/UserDetails'
 import BottomTabs, { bottomTabIcons } from '../components/Home/BottomTabs'
-import UserPosts from '../components/UserProfile/UserPosts'
+import UserContent from '../components/UserProfile/UserPosts'
 const UserProfileScreen = ({navigation}) => {
   return (
     <SafeAreaView>
       <UserProfileHeader />
       <Divider width={1} orientation='vertical'/>
       <UserDetails users = {USERS[0]} navigation={navigation}/>
-      <UserPosts navigation={navigation}/>
+      <UserContent navigation={navigation}/>
       <BottomTabs icons={bottomTabIcons}/>
     </SafeAreaView>
   )
