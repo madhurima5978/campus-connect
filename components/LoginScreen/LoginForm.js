@@ -81,9 +81,9 @@ const onLogin = async (email, password) => {
                 value={values.password}
             />
         </View>
-        <View style = {{ alignItems: 'flex-end', marginBottom: 30}}>
+        <TouchableOpacity style = {{ alignItems: 'flex-end', marginBottom: 30}} onPress={()=>navigation.navigate('ForgotPasswordScreen')}>
             <Text style ={{color : '#FF2701'}}>Forgot Password?</Text>
-        </View>
+        </TouchableOpacity>
         <Pressable 
             titleSize={20} 
             style = {styles.button(isValid)}

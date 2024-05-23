@@ -131,9 +131,7 @@ return (
 
         
 
-        <View style = {{ alignItems: 'flex-end', marginBottom: 30}}>
-            <Text style ={{color : '#FF2701'}}>Forgot Password?</Text>
-        </View>
+        
 
         <Pressable 
             titleSize={20} 

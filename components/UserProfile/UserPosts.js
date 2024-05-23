@@ -67,10 +67,10 @@ const UserContent = ({navigation}) => {
         ))}
       </ScrollView> */}
        
-      <Tab.Navigator>
+      {/* <Tab.Navigator>
         <Tab.Screen name="Posts" component={UserPosts} />
         <Tab.Screen name="Events" component={UserEvents} />
-      </Tab.Navigator>
+      </Tab.Navigator> */}
     
       <Text style={{height:'77%',}}></Text>
 

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Share } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity,TouchableWithoutFeedback,Modal,Alert, Share } from 'react-native';
 import { Divider } from 'react-native-elements';
 import {firebase, db} from '../../firebase';
 
@@ -65,10 +65,40 @@ const Post = ({ post, navigation }) => {
     })
   }
 
+  const handleDeletePost = () => {
+    Alert.alert(
+      'Delete Post',
+      'Are you sure you want to delete this post?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => deletePost(),
+          style: 'destructive',
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const deletePost = async () => {
+    try {
+      const postRef = db.collection('users').doc(postOwnerEmail).collection('posts').doc(postId);
+      await postRef.delete();
+      console.log('Post deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
+  };
+  currentUser = firebase.auth().currentUser;
+
   return (
     <View style={styles.container}>
       <Divider width={1} orientation='vertical' />
-      <PostHeader post={post} navigation={navigation}/>
+      <PostHeader post={post} navigation={navigation} currentUser={currentUser} handleDeletePost={handleDeletePost}/>
       <PostImage post={post} handleDoubleTap={handleDoubleTap} />
       <View style={{marginHorizontal: 15, marginTop: 10}}>
         <PostFooter handleLike={handleLike} post={post} navigation={navigation}/>
@@ -83,29 +113,74 @@ const Post = ({ post, navigation }) => {
 
 
 
-const PostHeader = ({ post, navigation }) => {
+const PostHeader = ({ post, navigation, currentUser, handleDeletePost }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const isOwner = currentUser && currentUser.email === post.owner_email;
+
+
+  const [profilePicture, setProfilePicture] = useState(null);
+
+  // Fetch the user's profile picture
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      try {
+        const userDoc = await db.collection('users').doc(post.owner_email).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          setProfilePicture(userData.profile_picture);
+        }
+      } catch (error) {
+        console.error('Error fetching profile picture:', error);
+      }
+    };
+
+    fetchProfilePicture();
+  }, [post.owner_email]);
+
+
   return (
-    <View style={{
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      //margin: 5,
-      alignItems: 'center',
-    }}>
-
-    
-    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'space-between'}}>
-      <Image source={{uri: post.profile_picture}} style={styles.pfp} />
-      <TouchableOpacity onPress={()=>navigation.navigate('ProfileScreen')}>
-      <Text style={{marginLeft: 5, fontWeight: '700'}}>
-        {post.username}</Text>
-      </TouchableOpacity>
-
-    </View>
-    <Text style={{fontWeight: '900', justifyContent: 'space-between', width:'6%'}}>...</Text>
-    </View>
+    <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+      <View style={styles.headerContainer}>
+        <View style={styles.headerContent}>
+        {profilePicture && (
+            <Image source={{ uri: profilePicture }} style={styles.pfp} />
+          )}
+          <TouchableOpacity onPress={() => navigation.navigate('ProfileScreen')}>
+            <Text style={styles.username}>{post.username}</Text>
+          </TouchableOpacity>
+        </View>
+        {isOwner && (
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Text style={styles.moreOptions}>...</Text>
+          </TouchableOpacity>
+        )}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(!modalVisible)}
+        >
+          <View style={styles.modalView}>
+            {isOwner && (
+              <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => {
+                handleDeletePost();
+                setModalVisible(!modalVisible);
+              }}
+            >
+                <Text style={styles.optionText}>Delete Post</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.optionButton} onPress={() => setModalVisible(!modalVisible)}>
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
-
 const PostImage = ({post, handleDoubleTap}) => {
   
 
@@ -241,7 +316,20 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 30,
   },
-  
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 5,
+    flex: 1,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+
   pfp: {
     width: 35,
     height: 35,
@@ -260,6 +348,37 @@ const styles = StyleSheet.create({
     width: '40%',
     justifyContent: 'space-between',
   },
+  moreOptions: {
+    fontWeight: '900',
+    justifyContent: 'space-between',
+    width: '50%',
+  },
+  modalView: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  optionButton: {
+    backgroundColor: 'white',
+    padding: 15,
+    marginBottom: 10,
+    width: '100%',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  optionText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    backgroundColor: '#FF0000',
+    padding: 10,
+  }
 });
 
 export default Post;
