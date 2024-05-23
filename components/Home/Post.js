@@ -68,7 +68,7 @@ const Post = ({ post, navigation }) => {
   return (
     <View style={styles.container}>
       <Divider width={1} orientation='vertical' />
-      <PostHeader post={post} navigation={navigation}/>
+      <OfficialPostHeader post={post} navigation={navigation}/>
       <PostImage post={post} handleDoubleTap={handleDoubleTap} />
       <View style={{marginHorizontal: 15, marginTop: 10}}>
         <PostFooter handleLike={handleLike} post={post} navigation={navigation}/>
@@ -98,6 +98,32 @@ const PostHeader = ({ post, navigation }) => {
       <TouchableOpacity onPress={()=>navigation.navigate('ProfileScreen')}>
       <Text style={{marginLeft: 5, fontWeight: '700'}}>
         {post.username}</Text>
+      </TouchableOpacity>
+
+    </View>
+    <Text style={{fontWeight: '900', justifyContent: 'space-between', width:'6%'}}>...</Text>
+    </View>
+  );
+};
+
+const OfficialPostHeader = ({ post, navigation }) => {
+  return (
+    <View style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      margin: 5,
+      alignItems: 'center',
+    }}>
+
+    
+    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <Image source={{uri: post.profile_picture}} style={styles.pfp} />
+      <TouchableOpacity onPress={()=>navigation.navigate('ProfileScreen')}>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <Text style={{marginLeft: 5, fontWeight: '700'}}>
+          {post.username}</Text>
+        <Image source={require('../../assets/officialicon.png')} style={styles.offcpfp}/>
+      </View>
       </TouchableOpacity>
 
     </View>
@@ -249,6 +275,13 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     borderWidth: 1.6,
     borderColor: '#ff8501',
+  },
+
+  offcpfp: {
+    width: 20,
+    height: 20,
+    borderRadius: 50,
+    marginLeft: 6
   },
   
   footerIcon: {

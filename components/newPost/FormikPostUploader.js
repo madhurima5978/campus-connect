@@ -5,6 +5,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Formik } from 'formik';
 import * as ImagePicker from 'expo-image-picker';
 import * as Yup from 'yup';
+import RadioGroup from 'react-native-radio-buttons-group';
 import validUrl from 'valid-url';
 
 const PLACEHOLDER_IMG = 'https://t4.ftcdn.net/jpg/05/17/53/57/360_F_517535712_q7f9QC9X6TQxWi6xYZZbMmw5cnLMr279.jpg';
@@ -29,6 +30,7 @@ const FormikPostUploader = ({ navigation }) => {
             );
         return unsubscribe;
     };
+    
 
     useEffect(() => {
         getUsername();
@@ -50,6 +52,7 @@ const FormikPostUploader = ({ navigation }) => {
 };
 
     const uploadPostToFirebase = async (imageUrl, caption) => {
+        const isOfficial = getSelectedRadioButtonValue() === 'official';
         const user = firebase.auth().currentUser;
         const userRef = db.collection('users').doc(user.email);
 
@@ -79,6 +82,7 @@ const FormikPostUploader = ({ navigation }) => {
                 caption: caption,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 likes_by_users: [],
+                isOfficial: isOfficial,
             });
 
             Alert.alert('Success', 'Post uploaded successfully!');
@@ -111,6 +115,9 @@ const FormikPostUploader = ({ navigation }) => {
                             />
                         </View>
                     </View>
+                    {radioButtons && (
+                        <RadioGroup radioButtons={radioButtons} onPress={onPressRadioButton} layout="row" />
+                    )}
                     <Button title="Pick Image" onPress={pickImage} />
                     {errors.imageUrl && (
                         <Text style={{ fontSize: 10, color: 'red' }} >
