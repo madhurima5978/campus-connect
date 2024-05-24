@@ -27,9 +27,10 @@ import UpdateDetails from './screens/UpdateDetailsScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import UpdateProfilePicScreen from './screens/UpdateProfilePicScreen';
 import DisplayEventScreen from './screens/DisplayEventScreen';
+import ForgotPassword from './screens/ForgotPasswordScreen';
 // import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 // import EventNav from './screens/EventScreen';
-
+import Toast from 'react-native-toast-message';
 const Stack = createStackNavigator();
 
 const screenOptions = {
@@ -48,12 +49,18 @@ const screenOptions = {
       screenOptions={screenOptions}>
         <Stack.Screen name='SignUpScreen' component={SignupScreen}/>
         <Stack.Screen name='LoginScreen' component={LoginScreen}/>
+        <Stack.Screen name='ForgotPasswordScreen' component={ForgotPassword}/>
       </Stack.Navigator>
-      
+      <ToastComponent />
       
     </NavigationContainer>
   );
 };
+
+const ToastComponent = React.forwardRef((props, ref) => {
+  return <Toast ref={ref} />;
+});
+
 
  const SignedInStack = () => {
   

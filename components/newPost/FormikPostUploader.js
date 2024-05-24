@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Image, Alert } from 'react-native';
+import { View, Text, TextInput, Button, Image, Alert, StyleSheet } from 'react-native';
 import { firebase, storage, db } from '../../firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Formik } from 'formik';
@@ -19,21 +19,19 @@ const FormikPostUploader = ({ navigation }) => {
     const [currentLoggedInUser, setCurrentLoggedInUser] = useState(null);
     const [radioButtons, setRadioButtons] = useState([
         {
-        id: '1',
-        label: 'Official Post',
-        value: 'official',
-        selected: true,
+            id: '1',
+            label: 'Official Post',
+            value: 'official',
+            selected: true,
         },
         {
-        id: '2',
-        label: 'Unofficial Post',
-        value: 'unofficial',
+            id: '2',
+            label: 'Unofficial Post',
+            value: 'unofficial',
         },
     ]);
 
-    
-
-    const getUsername = () => {
+    useEffect(() => {
         const getUsername = async () => {
             const user = firebase.auth().currentUser;
             const snapshot = await db.collection('users')
@@ -46,29 +44,22 @@ const FormikPostUploader = ({ navigation }) => {
                 });
             }
         };
-    };
-    
-
-    useEffect(() => {
         getUsername();
     }, []);
 
     const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-        multiple: true,
-    });
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
 
-    if (!result.cancelled) {
-      const selectedImages = result.assets.map(asset => asset.uri);
-      setThumbnailUrl(selectedImages[0]);
-  }
-};
-
-    
+        if (!result.cancelled) {
+            const selectedImages = result.assets.map(asset => asset.uri);
+            setThumbnailUrl(selectedImages[0]);
+        }
+    };
 
     const onPressRadioButton = (radioButtonsArray) => {
         setRadioButtons(radioButtonsArray);
@@ -85,7 +76,7 @@ const FormikPostUploader = ({ navigation }) => {
         const userRef = db.collection('users').doc(user.email);
 
         try {
-            if (!thumbnailUrl) {                
+            if (!thumbnailUrl) {
                 Alert.alert('Error', 'Please select an image for the post.');
                 return;
             }
@@ -131,10 +122,10 @@ const FormikPostUploader = ({ navigation }) => {
             {({ handleBlur, handleChange, handleSubmit, values, errors, isValid }) => (
                 <>
                     <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-                        <Image source={{ uri: validUrl.isUri(thumbnailUrl) ? thumbnailUrl : PLACEHOLDER_IMG }} style={{ width: 100, height: 100 }} />
+                        <Image source={{ uri: validUrl.isUri(thumbnailUrl) ? thumbnailUrl : PLACEHOLDER_IMG }} style={styles.image} />
                         <View style={{ flex: 1, padding: 5 }}>
                             <TextInput
-                                style={{ color: 'black', fontSize: 18 }}
+                                style={styles.textInput}
                                 multiline={true}
                                 placeholder='Write a caption'
                                 onChangeText={handleChange('caption')}
@@ -143,7 +134,11 @@ const FormikPostUploader = ({ navigation }) => {
                             />
                         </View>
                     </View>
-                    <RadioGroup radioButtons={radioButtons} onPress={onPressRadioButton} layout="row" />
+                    <RadioGroup
+                        radioButtons={radioButtons}
+                        onPress={onPressRadioButton}
+                        layout="row"
+                    />
                     <Button title="Pick Image" onPress={pickImage} />
                     {errors.imageUrl && (
                         <Text style={{ fontSize: 10, color: 'red' }} >
@@ -156,5 +151,16 @@ const FormikPostUploader = ({ navigation }) => {
         </Formik>
     );
 };
+
+const styles = StyleSheet.create({
+    image: {
+        width: 100,
+        height: 100,
+    },
+    textInput: {
+        color: 'black',
+        fontSize: 18,
+    },
+});
 
 export default FormikPostUploader;

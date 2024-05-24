@@ -51,17 +51,36 @@
 // })
 
 // export default Navigation;
+// RoomScreen.js
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
+import ChatRooms from '../components/Room/CreateChatRooms';
+import ChatRoom from '../components/Room/ManageChatRoom';
+import Participants from '../components/Room/Participants'; // Import Participants component
+import { Button } from 'react-native';
+const Stack = createStackNavigator();
 
-import { View, Text } from 'react-native'
-import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import Room from '../components/Room/Room'
 const RoomScreen = () => {
   return (
-    <SafeAreaView>
-        <Room/>
-    </SafeAreaView>
-  )
-}
+    <Stack.Navigator initialRouteName="Rooms">
+      <Stack.Screen name="Rooms" component={ChatRooms} />
+      <Stack.Screen
+        name="ChatRoom"
+        component={ChatRoom}
+        options={({ route, navigation }) => ({
+          headerTitle: route.params.roomName, // Use roomName parameter to set the title
+          headerRight: () => (
+            <Button
+              onPress={() => navigation.navigate('Participants', { roomId: route.params.roomId })}
+              title="Participants"
+              
+            />
+          ),
+        })}
+      />
+      <Stack.Screen name="Participants" component={Participants} />
+    </Stack.Navigator>
+  );
+};
 
-export default RoomScreen
+export default RoomScreen;

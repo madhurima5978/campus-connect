@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Share } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity,TouchableWithoutFeedback,Modal,Alert, Share } from 'react-native';
 import { Divider } from 'react-native-elements';
 import {firebase, db} from '../../firebase';
 
@@ -88,6 +88,36 @@ const Post = ({ post, navigation }) => {
       console.log('Error liking', error)
     })
   }
+
+  const handleDeletePost = () => {
+    Alert.alert(
+      'Delete Post',
+      'Are you sure you want to delete this post?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: () => deletePost(),
+          style: 'destructive',
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const deletePost = async () => {
+    try {
+      const postRef = db.collection('users').doc(postOwnerEmail).collection('posts').doc(postId);
+      await postRef.delete();
+      console.log('Post deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+    }
+  };
+  currentUser = firebase.auth().currentUser;
 
   return (
     <View style={styles.container}>
@@ -295,7 +325,20 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 30,
   },
-  
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 5,
+    flex: 1,
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+
   pfp: {
     width: 35,
     height: 35,
@@ -321,6 +364,37 @@ const styles = StyleSheet.create({
     width: '40%',
     justifyContent: 'space-between',
   },
+  moreOptions: {
+    fontWeight: '900',
+    justifyContent: 'space-between',
+    width: '50%',
+  },
+  modalView: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  optionButton: {
+    backgroundColor: 'white',
+    padding: 15,
+    marginBottom: 10,
+    width: '100%',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  optionText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    backgroundColor: '#FF0000',
+    padding: 10,
+  }
 });
 
 export default Post;

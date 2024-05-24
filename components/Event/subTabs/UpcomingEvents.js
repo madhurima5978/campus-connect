@@ -112,6 +112,27 @@ const EventHeader = ({ event }) => {
   };
   
 
+  const [eventProfilePicture, setEventProfilePicture] = useState(null);
+
+// Fetch the event's profile picture
+useEffect(() => {
+  const fetchEventProfilePicture = async () => {
+    try {
+      const eventDoc = await db.collection('events').doc(event.id).get();
+      if (eventDoc.exists) {
+        const eventData = eventDoc.data();
+        setEventProfilePicture(eventData.profile_picture);
+      }
+    } catch (error) {
+      console.error('Error fetching event profile picture:', error);
+    }
+  };
+
+  fetchEventProfilePicture();
+}, [event.id]);
+
+  
+
   const handleShareEvent = () => {
     // Implement event sharing logic here
   };
@@ -123,6 +144,8 @@ const EventHeader = ({ event }) => {
     }}>
       <View style={styles.headerContainer}>
         <View style={styles.headerContent}>
+        <Image source={{ uri: eventProfilePicture }} style={styles.profilePicture} />
+
           <Text style={styles.username}>{event.username}</Text>
         </View>
         {isOwner && (

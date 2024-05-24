@@ -14,7 +14,7 @@ const UserProfileScreen = ({navigation}) => {
       <Divider width={1} orientation='vertical'/>
       <UserDetails users = {USERS[0]} navigation={navigation}/>
       <UserContent navigation={navigation}/>
-      <BottomTabs icons={bottomTabIcons}/>
+      
     </SafeAreaView>
   )
 }

@@ -27,4 +27,5 @@ const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : fir
 const db = firebase.firestore()
 // const firebaseApp = getApp();
 const storage = getStorage(app, "gs://campusconn-b167a.appspot.com");
-export {firebase, db, storage};
+const firestore = firebase.firestore();
+export {firebase, db, storage, firestore};
