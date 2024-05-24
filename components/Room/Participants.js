@@ -35,22 +35,6 @@ const Participants = ({ route, navigation }) => {
     fetchParticipants();
   }, [roomId]);
 
-  useEffect(() => {
-    const deleteRoomIfNoParticipants = async () => {
-      if (participants.length === 0) {
-        try {
-          await firestore.collection('Rooms').doc(roomId).delete();
-          console.log('Room deleted successfully');
-          navigation.goBack();
-        } catch (error) {
-          console.error('Error deleting room:', error);
-        }
-      }
-    };
-
-    deleteRoomIfNoParticipants();
-  }, [participants, roomId, navigation]);
-
   const handleLeaveGroup = async () => {
     try {
       const user = firebase.auth().currentUser;

@@ -43,12 +43,7 @@ const uploadProfilePicture = async () => {
     // Delete existing profile picture from Firebase Storage
     const userData = await userRef.get();
     const existingProfilePictureURL = userData.data().profile_picture;
-    if (existingProfilePictureURL) {
-      const existingImageName = existingProfilePictureURL.split('/').pop();
-      const existingImageRef = ref(storage, `${user.email}/profile_picture/${existingImageName}`);
-      await deleteObject(existingImageRef);
-    }
-
+    
     const imageRef = ref(storage, imageName);
     await uploadBytes(imageRef, blob);
 

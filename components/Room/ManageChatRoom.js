@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, FlatList, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { firestore, firebase } from '../../firebase';
+import { View, TextInput, Button, FlatList, Text, Image, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { firestore, firebase, storage } from '../../firebase';
+import { Audio } from 'expo-av';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const ChatRoom = ({ route, navigation }) => {
   const { roomId, roomName } = route.params;
+  const [recording, setRecording] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [currentLoggedInUser, setCurrentLoggedInUser] = useState(null);
   const [isJoined, setIsJoined] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState(null);
+  const [playingAudio, setPlayingAudio] = useState(null);
 
   useEffect(() => {
     navigation.setOptions({ title: roomName });
@@ -156,6 +160,74 @@ const ChatRoom = ({ route, navigation }) => {
     }
   };
 
+  const startRecording = async () => {
+    try {
+      console.log('Requesting permissions..');
+      await Audio.requestPermissionsAsync();
+
+      console.log('Starting recording..');
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
+      setRecording(recording);
+      console.log('Recording started');
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  };
+
+  const stopRecording = async () => {
+    console.log('Stopping recording..');
+    setRecording(undefined);
+    await recording.stopAndUnloadAsync();
+    const uri = recording.getURI();
+    console.log('Recording stopped and stored at', uri);
+    uploadVoiceMessage(uri);
+  };
+
+  const uploadVoiceMessage = async (uri) => {
+    try {
+      const user = firebase.auth().currentUser;
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const timestamp = new Date().getTime();
+      const randomNum = Math.floor(Math.random() * 1000000);
+      const audioName = `${user.email}/voice_messages/${timestamp}-${randomNum}.m4a`;
+
+      const audioRef = ref(storage, audioName);
+      await uploadBytes(audioRef, blob);
+
+      const audioURL = await getDownloadURL(audioRef);
+
+      await firestore.collection('Rooms').doc(roomId).collection('messages').add({
+        audio: audioURL,
+        createdAt: new Date(),
+        displayName: currentLoggedInUser.username,
+        email: user.email,
+      });
+
+      console.log('Voice message uploaded successfully:', audioURL);
+    } catch (error) {
+      console.error('Error uploading voice message:', error);
+    }
+  };
+
+  const playAudio = async (uri) => {
+    if (playingAudio) {
+      await playingAudio.unloadAsync();
+      setPlayingAudio(null);
+    }
+    const { sound } = await Audio.Sound.createAsync({ uri });
+    setPlayingAudio(sound);
+    await sound.playAsync();
+  };
+
   const renderMessage = ({ item }) => {
     const isCurrentUserMessage = item.email === currentLoggedInUser.email;
 
@@ -172,7 +244,12 @@ const ChatRoom = ({ route, navigation }) => {
         <Image source={{ uri: item.profilePicture }} style={styles.pfp} />
         <View style={styles.messageContent}>
           <Text style={styles.username}>{item.displayName}</Text>
-          <Text style={styles.messageText}>{item.text}</Text>
+          {item.text && <Text style={styles.messageText}>{item.text}</Text>}
+          {item.audio && (
+            <TouchableOpacity onPress={() => playAudio(item.audio)}>
+              <Text style={styles.playAudioText}>Play Audio</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
     );
@@ -196,6 +273,10 @@ const ChatRoom = ({ route, navigation }) => {
               onChangeText={setMessage}
             />
             <Button title="Send" onPress={handleSendMessage} />
+            <Button
+              title={recording ? 'Stop Recording' : 'Record Voice Message'}
+              onPress={recording ? stopRecording : startRecording}
+            />
           </View>
         ) : (
           <TouchableOpacity style={styles.joinButton} onPress={handleJoinRoom}>
@@ -229,8 +310,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingHorizontal: 10,
   },
-  pfp
-: {
+  pfp: {
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -245,6 +325,10 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+  },
+  playAudioText: {
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
   inputContainer: {
     flexDirection: 'row',
