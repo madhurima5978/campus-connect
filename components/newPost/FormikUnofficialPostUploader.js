@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, Image, Alert, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Image, Alert } from 'react-native';
 import { firebase, storage, db } from '../../firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Formik } from 'formik';
 import * as ImagePicker from 'expo-image-picker';
 import * as Yup from 'yup';
-import RadioGroup from 'react-native-radio-buttons-group';
 import validUrl from 'valid-url';
 
 const PLACEHOLDER_IMG = 'https://t4.ftcdn.net/jpg/05/17/53/57/360_F_517535712_q7f9QC9X6TQxWi6xYZZbMmw5cnLMr279.jpg';
@@ -14,64 +13,43 @@ const uploadPostSchema = Yup.object().shape({
     caption: Yup.string().max(2200, 'Caption has reached the maximum characters'),
 });
 
-const FormikPostUploader = ({ navigation }) => {
+const FormikUnofficialPostUploader = ({ navigation }) => {
     const [thumbnailUrl, setThumbnailUrl] = useState(PLACEHOLDER_IMG);
     const [currentLoggedInUser, setCurrentLoggedInUser] = useState(null);
-    const [radioButtons, setRadioButtons] = useState([
-        {
-            id: '1',
-            label: 'Official Post',
-            value: 'official',
-            selected: true,
-        },
-        {
-            id: '2',
-            label: 'Unofficial Post',
-            value: 'unofficial',
-        },
-    ]);
+
+    const getUsername = () => {
+        const user = firebase.auth().currentUser;
+        const unsubscribe = db.collection('users')
+            .where('owner_uid', '==', user.uid).limit(1).onSnapshot(
+                snapshot => snapshot.docs.map(doc => {
+                    setCurrentLoggedInUser({
+                        username: doc.data().username,
+                    });
+                })
+            );
+        return unsubscribe;
+    };
 
     useEffect(() => {
-        const getUsername = async () => {
-            const user = firebase.auth().currentUser;
-            const snapshot = await db.collection('users')
-                .where('owner_uid', '==', user.uid).limit(1).get();
-            
-            if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
-                setCurrentLoggedInUser({
-                    username: doc.data().username,
-                });
-            }
-        };
         getUsername();
     }, []);
 
     const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsEditing: true,
-            aspect: [1, 1],
-            quality: 1,
-        });
+    let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        //aspect: [1, 1],
+        quality: 1,
+        multiple: true,
+    });
 
-        if (!result.cancelled) {
-            const selectedImages = result.assets.map(asset => asset.uri);
-            setThumbnailUrl(selectedImages[0]);
-        }
-    };
-
-    const onPressRadioButton = (radioButtonsArray) => {
-        setRadioButtons(radioButtonsArray);
-    };
-
-    const getSelectedRadioButtonValue = () => {
-        const selectedButton = radioButtons.find(radioButton => radioButton.selected);
-        return selectedButton ? selectedButton.value : null;
-    };
+    if (!result.cancelled) {
+      const selectedImages = result.assets.map(asset => asset.uri);
+      setThumbnailUrl(selectedImages[0]);
+  }
+};
 
     const uploadPostToFirebase = async (imageUrl, caption) => {
-        const isOfficial = getSelectedRadioButtonValue() === 'official';
         const user = firebase.auth().currentUser;
         const userRef = db.collection('users').doc(user.email);
 
@@ -101,7 +79,6 @@ const FormikPostUploader = ({ navigation }) => {
                 caption: caption,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 likes_by_users: [],
-                isOfficial: isOfficial,
             });
 
             Alert.alert('Success', 'Post uploaded successfully!');
@@ -122,10 +99,10 @@ const FormikPostUploader = ({ navigation }) => {
             {({ handleBlur, handleChange, handleSubmit, values, errors, isValid }) => (
                 <>
                     <View style={{ flexDirection: 'row', marginBottom: 20 }}>
-                        <Image source={{ uri: validUrl.isUri(thumbnailUrl) ? thumbnailUrl : PLACEHOLDER_IMG }} style={styles.image} />
+                        <Image source={{ uri: validUrl.isUri(thumbnailUrl) ? thumbnailUrl : PLACEHOLDER_IMG }} style={{ width: 100, height: 100 }} />
                         <View style={{ flex: 1, padding: 5 }}>
                             <TextInput
-                                style={styles.textInput}
+                                style={{ color: 'black', fontSize: 18 }}
                                 multiline={true}
                                 placeholder='Write a caption'
                                 onChangeText={handleChange('caption')}
@@ -134,11 +111,6 @@ const FormikPostUploader = ({ navigation }) => {
                             />
                         </View>
                     </View>
-                    <RadioGroup
-                        radioButtons={radioButtons}
-                        onPress={onPressRadioButton}
-                        layout="row"
-                    />
                     <Button title="Pick Image" onPress={pickImage} />
                     {errors.imageUrl && (
                         <Text style={{ fontSize: 10, color: 'red' }} >
@@ -152,15 +124,4 @@ const FormikPostUploader = ({ navigation }) => {
     );
 };
 
-const styles = StyleSheet.create({
-    image: {
-        width: 100,
-        height: 100,
-    },
-    textInput: {
-        color: 'black',
-        fontSize: 18,
-    },
-});
-
-export default FormikPostUploader;
+export default FormikUnofficialPostUploader;

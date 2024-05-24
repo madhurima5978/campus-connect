@@ -20,7 +20,31 @@ const postFooterIcons = [
 
 ];
 
+
+
 const Post = ({ post, navigation }) => {
+
+  const [isOfficial, setIsOfficial] = useState(null);
+
+    useEffect(() => {
+        const fetchIsOfficialStatus = async () => {
+            try {
+                const user = firebase.auth().currentUser;
+                const doc = await db.collection('users').doc(user.email).collection('posts').doc(postId).get();
+
+                if (doc.exists) {
+                    setIsOfficial(doc.data().isOfficial);
+                }
+            } catch (error) {
+                console.error('Error fetching isOfficial status:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIsOfficialStatus();
+    }, []);
+
 
   // const handleCommentIconClick = () => {
   //   // Navigate to the CommentScreen and pass postId and onClose function
@@ -98,7 +122,10 @@ const Post = ({ post, navigation }) => {
   return (
     <View style={styles.container}>
       <Divider width={1} orientation='vertical' />
-      <PostHeader post={post} navigation={navigation} currentUser={currentUser} handleDeletePost={handleDeletePost}/>
+      {isOfficial
+                ? <OfficialPostHeader post={post} navigation={navigation}/>
+                : <PostHeader post={post} navigation={navigation}/>}
+      
       <PostImage post={post} handleDoubleTap={handleDoubleTap} />
       <View style={{marginHorizontal: 15, marginTop: 10}}>
         <PostFooter handleLike={handleLike} post={post} navigation={navigation}/>
@@ -113,74 +140,55 @@ const Post = ({ post, navigation }) => {
 
 
 
-const PostHeader = ({ post, navigation, currentUser, handleDeletePost }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const isOwner = currentUser && currentUser.email === post.owner_email;
-
-
-  const [profilePicture, setProfilePicture] = useState(null);
-
-  // Fetch the user's profile picture
-  useEffect(() => {
-    const fetchProfilePicture = async () => {
-      try {
-        const userDoc = await db.collection('users').doc(post.owner_email).get();
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          setProfilePicture(userData.profile_picture);
-        }
-      } catch (error) {
-        console.error('Error fetching profile picture:', error);
-      }
-    };
-
-    fetchProfilePicture();
-  }, [post.owner_email]);
-
-
+const PostHeader = ({ post, navigation }) => {
   return (
-    <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-      <View style={styles.headerContainer}>
-        <View style={styles.headerContent}>
-        {profilePicture && (
-            <Image source={{ uri: profilePicture }} style={styles.pfp} />
-          )}
-          <TouchableOpacity onPress={() => navigation.navigate('ProfileScreen')}>
-            <Text style={styles.username}>{post.username}</Text>
-          </TouchableOpacity>
-        </View>
-        {isOwner && (
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Text style={styles.moreOptions}>...</Text>
-          </TouchableOpacity>
-        )}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(!modalVisible)}
-        >
-          <View style={styles.modalView}>
-            {isOwner && (
-              <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => {
-                handleDeletePost();
-                setModalVisible(!modalVisible);
-              }}
-            >
-                <Text style={styles.optionText}>Delete Post</Text>
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity style={styles.optionButton} onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </View>
-    </TouchableWithoutFeedback>
+    <View style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      //margin: 5,
+      alignItems: 'center',
+    }}>
+
+    
+    <View style={{flexDirection: 'row', alignItems: 'center', justifyContent:'space-between'}}>
+      <Image source={{uri: post.profile_picture}} style={styles.pfp} />
+      <TouchableOpacity onPress={()=>navigation.navigate('ProfileScreen')}>
+      <Text style={{marginLeft: 5, fontWeight: '700'}}>
+        {post.username}</Text>
+      </TouchableOpacity>
+
+    </View>
+    <Text style={{fontWeight: '900', justifyContent: 'space-between', width:'6%'}}>...</Text>
+    </View>
   );
 };
+
+const OfficialPostHeader = ({ post, navigation }) => {
+  return (
+    <View style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      margin: 5,
+      alignItems: 'center',
+    }}>
+
+    
+    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <Image source={{uri: post.profile_picture}} style={styles.pfp} />
+      <TouchableOpacity onPress={()=>navigation.navigate('ProfileScreen')}>
+      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <Text style={{marginLeft: 5, fontWeight: '700'}}>
+          {post.username}</Text>
+        <Image source={require('../../assets/officialicon.png')} style={styles.offcpfp}/>
+      </View>
+      </TouchableOpacity>
+
+    </View>
+    <Text style={{fontWeight: '900', justifyContent: 'space-between', width:'6%'}}>...</Text>
+    </View>
+  );
+};
+
 const PostImage = ({post, handleDoubleTap}) => {
   
 
@@ -193,7 +201,8 @@ const PostImage = ({post, handleDoubleTap}) => {
       
   <Image 
   source={{uri: post.imageUrl}}
-   style={{width: '100%',
+   style={{
+    width: '100%',
    height:'100%',
    resizeMode: 'cover',
   }}
@@ -337,6 +346,13 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     borderWidth: 1.6,
     borderColor: '#ff8501',
+  },
+
+  offcpfp: {
+    width: 20,
+    height: 20,
+    borderRadius: 50,
+    marginLeft: 6
   },
   
   footerIcon: {
