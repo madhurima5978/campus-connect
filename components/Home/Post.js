@@ -20,7 +20,31 @@ const postFooterIcons = [
 
 ];
 
+
+
 const Post = ({ post, navigation }) => {
+
+  const [isOfficial, setIsOfficial] = useState(null);
+
+    useEffect(() => {
+        const fetchIsOfficialStatus = async () => {
+            try {
+                const user = firebase.auth().currentUser;
+                const doc = await db.collection('users').doc(user.email).collection('posts').doc(postId).get();
+
+                if (doc.exists) {
+                    setIsOfficial(doc.data().isOfficial);
+                }
+            } catch (error) {
+                console.error('Error fetching isOfficial status:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIsOfficialStatus();
+    }, []);
+
 
   // const handleCommentIconClick = () => {
   //   // Navigate to the CommentScreen and pass postId and onClose function
@@ -68,7 +92,10 @@ const Post = ({ post, navigation }) => {
   return (
     <View style={styles.container}>
       <Divider width={1} orientation='vertical' />
-      <OfficialPostHeader post={post} navigation={navigation}/>
+      {isOfficial
+                ? <OfficialPostHeader post={post} navigation={navigation}/>
+                : <PostHeader post={post} navigation={navigation}/>}
+      
       <PostImage post={post} handleDoubleTap={handleDoubleTap} />
       <View style={{marginHorizontal: 15, marginTop: 10}}>
         <PostFooter handleLike={handleLike} post={post} navigation={navigation}/>
@@ -144,7 +171,8 @@ const PostImage = ({post, handleDoubleTap}) => {
       
   <Image 
   source={{uri: post.imageUrl}}
-   style={{width: '100%',
+   style={{
+    width: '100%',
    height:'100%',
    resizeMode: 'cover',
   }}
