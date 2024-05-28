@@ -1,6 +1,5 @@
 import { View, Text, TextInput, Button, Pressable, Touchable, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import React, {useState} from 'react'
-
 import {Formik} from 'formik'
 import * as Yup from 'yup'
 import Validator from 'email-validator'
@@ -12,7 +11,6 @@ const LoginForm = ({navigation}) => {
             .required()
             .min(8, 'Your Password has to have a least 8 characters'),
     })
-
 const onLogin = async (email, password) => {
     try{
         await firebase.auth().signInWithEmailAndPassword(email, password)
@@ -25,7 +23,6 @@ const onLogin = async (email, password) => {
                 
     }
 }
-
   return (
     <View style={styles.wrapper}>
         <Formik
@@ -59,7 +56,6 @@ const onLogin = async (email, password) => {
                 value={values.email}
             />
         </View>
-
         <View 
             style={[
                 styles.inputField,
@@ -104,7 +100,6 @@ const onLogin = async (email, password) => {
     </View>
   )
 }
-
 const styles = StyleSheet.create({
     wrapper : {
         marginTop : 80,
@@ -135,5 +130,4 @@ const styles = StyleSheet.create({
         marginTop: 50,
     },
 }) 
-
 export default LoginForm

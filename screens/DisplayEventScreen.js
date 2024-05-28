@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { db } from '../firebase';
 import UpcomingEvents from '../components/Event/subTabs/UpcomingEvents';
-
 const DisplayEventScreen = ({ route }) => {
   const { eventId, ownerEmail } = route.params;
   const [eventDetails, setEventDetails] = useState(null);
-
   useEffect(() => {
     const fetchEventDetails = async () => {
       try {
@@ -21,10 +19,8 @@ const DisplayEventScreen = ({ route }) => {
         console.error('Error fetching event details:', error);
       }
     };
-
     fetchEventDetails();
   }, [eventId, ownerEmail]);
-
   if (!eventDetails) {
     return (
       <View style={styles.container}>
@@ -32,7 +28,6 @@ const DisplayEventScreen = ({ route }) => {
       </View>
     );
   }
-
   return (
     <View style={styles.container}>
       <Image source={{ uri: eventDetails.imageUrl }} style={styles.eventImage} />
@@ -43,7 +38,6 @@ const DisplayEventScreen = ({ route }) => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     padding: 20,
@@ -69,5 +63,4 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 });
-
 export default DisplayEventScreen;

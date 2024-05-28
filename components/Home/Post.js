@@ -44,13 +44,6 @@ const Post = ({ post, navigation }) => {
 
         fetchIsOfficialStatus();
     }, []);
-
-
-  // const handleCommentIconClick = () => {
-  //   // Navigate to the CommentScreen and pass postId and onClose function
-  //   // onClose function is used to close the CommentScreen when comment is submitted
-  //   navigation.navigate('CommentScreen', { postId: post.id, onClose: onCloseCommentScreen });
-  // };
   const postOwnerEmail = post.owner_email; // Email of the post owner
   const postId = post.id;
   const [lastTap, setLastTap] = useState(null);
@@ -137,9 +130,6 @@ const Post = ({ post, navigation }) => {
     </View>
   );
 };
-
-
-
 const PostHeader = ({ post, navigation }) => {
   return (
     <View style={{

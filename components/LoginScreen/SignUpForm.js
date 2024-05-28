@@ -14,7 +14,6 @@ const SignUpForm = ({navigation}) => {
         username: Yup.string().required().min(6, 'A username is required'),
         password: Yup.string().required().min(8, 'Your Password has to have at least 8 characters')
     })
-
     const onSignup = async( email,password, username, rollnumber) => {
         try{
             const authUser = await firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -86,7 +85,6 @@ return (
                 value={values.email}
             />
         </View>
-
         <View 
                 style={[
                     styles.inputField,
@@ -106,7 +104,6 @@ return (
                 value={values.username}
             />
         </View>
-
         <View 
             style={[
                 styles.inputField,
@@ -128,11 +125,6 @@ return (
                 value={values.password}
             />
         </View>
-
-        
-
-        
-
         <Pressable 
             titleSize={20} 
             style = {styles.button(isValid)}
@@ -154,7 +146,6 @@ return (
     </View>
   )
 }
-
 const styles = StyleSheet.create({
     wrapper : {
         marginTop : 80,
@@ -185,5 +176,4 @@ const styles = StyleSheet.create({
         marginTop: 50,
     },
 }) 
-
 export default SignUpForm

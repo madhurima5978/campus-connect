@@ -11,8 +11,7 @@ const CommentScreen = ({route}) => {
   console.log(postId)
   return (
     <SafeAreaView>
-      <CommentSection postOwnerEmail={postOwnerEmail} postId={postId} />
-      
+      <CommentSection postOwnerEmail={postOwnerEmail} postId={postId} />   
     </SafeAreaView>
   )
 }

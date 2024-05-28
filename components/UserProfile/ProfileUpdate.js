@@ -17,18 +17,6 @@ const ProfileUpdate = () => {
 
     launchImageLibrary(options, handleResponse);
   };
-
-  // const handleCameraLaunch = () => {
-  //   const options = {
-  //     mediaType: 'photo',
-  //     includeBase64: false,
-  //     maxHeight: 2000,
-  //     maxWidth: 2000,
-  //   };
-
-  //   launchCamera(options, handleResponse);
-  // };
-
   const handleResponse = (response) => {
     if (response.didCancel) {
       console.log('User cancelled image picker');

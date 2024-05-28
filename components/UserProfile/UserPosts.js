@@ -1,15 +1,11 @@
 import { View, StyleSheet, Button, Image,Text,ScrollView } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import React,{useState,useEffect} from 'react'
 import {firebase, db} from '../../firebase'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import ImagePickerExample from './ProfileUpdate.js'
-import ProfileUpdate from './ProfileUpdate.js';
 import Post from '../Home/Post.js';
-
 const Tab = createMaterialTopTabNavigator();
-
 const handleSignOut = async() => {
   try{
     await firebase.auth().signOut()
@@ -18,60 +14,34 @@ const handleSignOut = async() => {
     console.log(error)
   }
 }
-
-
-
 const UserContent = ({navigation}) => {
-
   const [posts, setPosts] = useState([]);
-
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         const userEmail = user.email;
-        
-        // Query posts where owner_email matches the logged-in user's email
         const postsRef = db.collectionGroup('posts').where('owner_email', '==', userEmail);
-
-        // Subscribe to snapshot changes
         const unsubscribePosts = postsRef.onSnapshot(snapshot => {
           setPosts(snapshot.docs.map(post => ({ id: post.id, ...post.data() })));
         });
-
-        // Clean up function
         return () => {
-          unsubscribePosts(); // Unsubscribe from snapshot changes when component unmounts
+          unsubscribePosts();
         };
       }
     });
-
-    // Clean up function
     return () => {
-      unsubscribe(); // Unsubscribe from auth state changes when component unmounts
+      unsubscribe();
     };
   }, []);
 
   return (
     <View>
-      
       <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('UpdateDetailsScreen')}>
         <Text style={{ color: 'white' }}>Update Details</Text>
       </TouchableOpacity>
-
       <TouchableOpacity onPress={handleSignOut} style={styles.button}>
       <Text style={{ color: 'white' }}>Sign Out</Text>
     </TouchableOpacity>
-    {/* <ScrollView>
-        {posts.map((post, index) => (
-          <Post key={index} post={post} />
-        ))}
-      </ScrollView> */}
-       
-      {/* <Tab.Navigator>
-        <Tab.Screen name="Posts" component={UserPosts} />
-        <Tab.Screen name="Events" component={UserEvents} />
-      </Tab.Navigator> */}
-    
       <Text style={{height:'77%',}}></Text>
 
     </View>

@@ -6,14 +6,14 @@ const UpdateDetails = () => {
   const [userDetails, setUserDetails] = useState({
     displayName: '',
     email: '',
-    // Add other user details here if needed
   });
   const [newDisplayName, setNewDisplayName] = useState('');
 
   useEffect(() => {
+    const user = firebase.auth().currentUser;
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        // Fetch user details from Firebase
+        // Fetch user details from Firebase using user.email
         db.collection('users')
           .doc(user.email)
           .get()
@@ -29,34 +29,35 @@ const UpdateDetails = () => {
           });
       }
     });
-
     return () => unsubscribe();
   }, []);
-
   const handleDisplayNameChange = text => {
     setNewDisplayName(text);
   };
-
   const handleSubmit = () => {
-    // Update display name in Firebase
-    db.collection('users')
-      .doc(firebase.auth().currentUser.uid)
-      .update({
-        displayName: newDisplayName,
-      })
-      .then(() => {
-        console.log('Document successfully updated!');
-        setUserDetails({ ...userDetails, displayName: newDisplayName });
-        setNewDisplayName('');
-      })
-      .catch(error => {
-        console.error('Error updating document: ', error);
-      });
+    const user = firebase.auth().currentUser;
+    if (user) {
+      db.collection('users')
+        .doc(user.email)
+        .update({
+          username: newDisplayName,
+        })
+        .then(() => {
+          console.log('Document successfully updated!');
+          setUserDetails({ ...userDetails, username: newDisplayName });
+          setNewDisplayName('');
+        })
+        .catch(error => {
+          console.error('Error updating document: ', error);
+        });
+    } else {
+      console.error('No user is logged in');
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Display Name:</Text>
+      <Text style={styles.label}>Username: </Text>
       <TextInput
         style={styles.input}
         value={newDisplayName}
